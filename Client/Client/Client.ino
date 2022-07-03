@@ -12,7 +12,9 @@ const int  en3 = 38;
 LiquidCrystal lcd1(rs, en1, d4, d5, d6, d7);
 LiquidCrystal lcd2(rs, en2, d4, d5, d6, d7);
 LiquidCrystal lcd3(rs, en3, d4, d5, d6, d7);
-
+  int flag=0;
+  bool zero =false;
+  bool getRoom=false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -30,5 +32,52 @@ void setup() {
 
 void loop() {
   // put your main code here, to run repeatedly:
-
-}
+    if (Serial.available())                        // checking if data is received/available 
+  {
+           char input = Serial.read();    
+           Serial.println(input);  
+           if(getRoom == true){
+             int num = input - '0';
+             Serial.print("Room : ");
+             Serial.println(num);
+           }
+           if( input == '$')
+              getRoom = true;
+          
+              
+          // int num = input - '0';
+//           if(num>=0)
+//      {
+//           Serial.println(num);                    // printing received number on LCD
+//           if(getRoom == true ){
+//             Serial.println("This is room number");
+//             getRoom=false;
+//           }
+//
+//           if(num == 0)
+//           {     
+//             flag++;
+//             zero = true;
+//             Serial.println("++");
+//           }
+//           else{
+//            zero = false;
+//            //Serial.println("--");
+//           }
+//           if(zero ==true && flag == 3){
+//             getRoom = true;
+//             Serial.println("Room");
+//             zero = false;
+//             flag = 0;
+//           }
+//           if(zero == false && flag>0){                      
+//              flag=0;
+//              Serial.println("reset");
+//           }
+//           Serial.print("zero: ");
+//           Serial.println(zero);
+//           Serial.print("flag: ");
+//           Serial.println(flag);
+  }
+  }
+ 

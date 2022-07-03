@@ -10,7 +10,7 @@ bool requested = false;
 bool lastRequest = false;
 int rooms[3]={0,0,0};
 bool doors[3]={false,false,false};
-
+byte sendData[2];
 char keys[ROWS][COLS] = {
   {'7','8','9', '/'},
   {'4','5','6', '*'},
@@ -31,19 +31,34 @@ void loop() {
   // put your main code here, to run repeatedly:
  char key = keypad.getKey();
  if(key!=NO_KEY){
-   Serial.println("Request detected...");
- Serial.println(key);
+ Serial.println("Request detected...");
  welcome(key);
   int result = -2;;
   if(requested){
      result = passCheck();
   if( result == 1 ){
      Serial.println("Entered Successfully!");
+     Serial.print('$');
+     switch(room){
+     case 1:
+        Serial.println('1');
+        break;
+     case 2:
+        Serial.println('2');
+        break;
+     case 3:
+        Serial.println('3');
+        break;        
+     } 
+     delay(5000);
      requested = false;
      doors[room-1]=true;
   }
   else{
     Serial.println("Wrong Password!");
+     Serial.println('$');
+     Serial.print('4'); // sending array which will go byte by byte in sequence 
+     delay(5000);
     callPolice();
     requested = false;
   }
@@ -134,9 +149,6 @@ int passCheck(){
      }
 }
   }
-  Serial.println("");
-  Serial.println(passLen);
-  Serial.println(password);
   if(passLen==5)
      {
       int check=0;
