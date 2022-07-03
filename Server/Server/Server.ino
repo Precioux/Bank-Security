@@ -22,27 +22,45 @@ char keys[ROWS][COLS] = {
 byte rowPins[ROWS] = {13, 12, 11, 10}; //connect to the row pinouts of the keypad
 byte colPins[COLS] = {14, 15, 16, 17}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
-
+bool addFlag = false;
+bool subFlag = false;
+bool managerFlag = false;
 
 void setup() {
-  // put your setup code here, to run once:
   Serial.begin(9600);
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
+  //find out if user wants to enter or exit or manager wants to set passwords
  char key = keypad.getKey();
  if(key!=NO_KEY){
-   Serial.println("Request detected...");
-  if(key=='+'){
-  Serial.println("Entering Mode, Which room?");
-   char k = keypad.getKey();
-   if(k!=NO_KEY){
- welcome(k);
-  int result = -2;;
-  if(requested){
-     result = passCheck();
-  if( result == 1 ){
+   //Serial.println("Request detected...");
+   if( subFlag==false && addFlag==false && managerFlag==false){
+   switch(key)
+   {
+    case '+':
+          Serial.println("Entering Mode, Which room?");
+          addFlag=true;
+          break;
+    case '-':
+          Serial.println("Exiting Mode, Which room?");
+          subFlag=true;
+          break;
+    case '/':
+          Serial.println("Hi manager,Enter 1 to continue:");
+          managerFlag=true;
+          break;    
+   }
+   }
+   else
+   {
+    if(addFlag == true)
+    {
+      welcome(key);
+      int result = -2;;
+      if(requested){
+      result = passCheck();
+      if( result == 1 ){
      Serial.println("Entered Successfully!");
      Serial.print('$');
      switch(room){
@@ -56,10 +74,11 @@ void loop() {
         Serial.println('3');
         break;        
      } 
+     //keeping door open for 5 seconds
      delay(5000);
      Serial.println("Closing door of room...");
      Serial.print('$');
-      switch(room){
+     switch(room){
      case 1:
         Serial.println('7');
         break;
@@ -72,13 +91,16 @@ void loop() {
       }
      doors[room-1]=false;
      requested = false;
+     Serial.println("");
      
   }
   else{
     if(result == -1){
     Serial.println("Wrong Password!");
+    //closing all doors and emptying all rooms
     Serial.println('$');
     Serial.print('0');
+    Serial.println("");
     delay(100);
     callPolice();
     requested = false;
@@ -89,16 +111,16 @@ void loop() {
         requested = false;
     }
   }
-}
-  }
- }
- else
- {
-  if(key=='-')
-  {
-   Serial.println("Exiting Mode, Which room?");
-   char k = keypad.getKey();
-   if(k!=NO_KEY){  
+    }
+    addFlag=false;
+    Serial.println("Done!");
+   }
+   else 
+   {
+    if(subFlag==true)
+    {
+     goodBye(key);
+     if(rooms[room-1]!=0){
      rooms[room-1]--;
      Serial.print('$');
      switch(room){
@@ -113,13 +135,51 @@ void loop() {
         break;       
       }
       requested = false;
+      subFlag=false;
+    }
+    else
+    {
+      Serial.println("This room is empty!");
+      requested=false;
+      subFlag=false;
+    }
+    }
+    else
+    {
+      if(managerFlag==true)
+      {
+        setPasswords();
+        managerFlag=false;
+      }
+    }
    }
-  }
+ }
+
+}
+}
+
+void goodBye(char key){
+ if(key){
+     switch(key)
+     {
+     case '1':
+         room = 1;
+         Serial.println("Exiting room 1");
+         requested = true;
+         break;
+     case '2':
+         room = 2;
+         Serial.println("Exiting room 2");
+         requested = true;
+         break;
+     case '3':
+         room = 3;
+         Serial.println("Exiting room 3");
+         requested = true;
+         break;
+     }
  }
 }
-}
-
-
 void welcome(char key){
  if(key){
      switch(key)
@@ -230,7 +290,7 @@ int passCheck(){
          if(rooms[room-1]<3){
             rooms[room-1]++;
          }
-         else result=-3
+         else result=-3;
       }
      }
      return result;
@@ -244,4 +304,7 @@ void callPolice(){
  doors[0]=false;
  doors[1]=false;
  doors[2]=false;
+}
+void setPasswords(){
+  Serial.println("Enter password:");
 }
