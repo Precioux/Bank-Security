@@ -7,6 +7,8 @@ const int rs = 35, en1 = 36, d4 = 40, d5 = 41, d6 = 42, d7 =43;
 const int  en2 = 37;
 // setup LCD1
 const int  en3 = 38;
+bool doors[]={false,false,false};
+int rooms[]={0,0,0};
 
 //lcds initialization
 LiquidCrystal lcd1(rs, en1, d4, d5, d6, d7);
@@ -14,7 +16,7 @@ LiquidCrystal lcd2(rs, en2, d4, d5, d6, d7);
 LiquidCrystal lcd3(rs, en3, d4, d5, d6, d7);
   int flag=0;
   bool zero =false;
-  bool getRoom=false;
+  bool getInput=false;
 
 void setup() {
   // put your setup code here, to run once:
@@ -36,48 +38,153 @@ void loop() {
   {
            char input = Serial.read();    
            Serial.println(input);  
-           if(getRoom == true){
+           if(getInput == true){
              int num = input - '0';
-             Serial.print("Room : ");
-             Serial.println(num);
+             switch(num){
+             case 0:
+               emptyAll();
+               break;
+             case 1:
+               addRoom(1);
+               break;
+             case 2:
+               addRoom(2);
+               break;    
+             case 3:
+               addRoom(3);
+               break;
+             case 4:
+               subRoom(1);
+               break;
+             case 5:
+               subRoom(2);
+               break;
+             case 6:
+               subRoom(3);
+               break;
+             case 7:
+               lockRoom(1);
+               break;
+             case 8:
+               lockRoom(2);
+               break;
+             case 9:
+               lockRoom(3);
+               break;                              
+             }
+             getInput=false;
            }
            if( input == '$')
-              getRoom = true;
-          
-              
-          // int num = input - '0';
-//           if(num>=0)
-//      {
-//           Serial.println(num);                    // printing received number on LCD
-//           if(getRoom == true ){
-//             Serial.println("This is room number");
-//             getRoom=false;
-//           }
-//
-//           if(num == 0)
-//           {     
-//             flag++;
-//             zero = true;
-//             Serial.println("++");
-//           }
-//           else{
-//            zero = false;
-//            //Serial.println("--");
-//           }
-//           if(zero ==true && flag == 3){
-//             getRoom = true;
-//             Serial.println("Room");
-//             zero = false;
-//             flag = 0;
-//           }
-//           if(zero == false && flag>0){                      
-//              flag=0;
-//              Serial.println("reset");
-//           }
-//           Serial.print("zero: ");
-//           Serial.println(zero);
-//           Serial.print("flag: ");
-//           Serial.println(flag);
+              getInput = true;
   }
   }
- 
+
+void addRoom(int room){
+  lcd1.clear();
+  lcd2.clear();
+  lcd3.clear();
+ rooms[room-1]++;
+ doors[room-1]=true;
+ switch(room)
+ {
+  case 1:
+        lcd1.print("Door is open");
+        lcd1.setCursor(0, 1);
+        lcd1.print(rooms[room-1]);
+        lcd1.print(" person");
+        break;
+  case 2:
+        lcd2.print("Door is open");
+        lcd2.setCursor(0, 1);
+        lcd2.print(rooms[room-1]);
+        lcd2.print(" person");
+        break;
+  case 3:
+        lcd3.print("Door is open");
+        lcd3.setCursor(0, 1);
+        lcd3.print(rooms[room-1]);
+        lcd3.print(" person");
+        break;  
+ }
+}
+
+void subRoom(int room)
+{
+  lcd1.clear();
+  lcd2.clear();
+  lcd3.clear();
+ rooms[room-1]--;
+ switch(room)
+ {
+  case 1:
+        lcd1.print("Door is open");
+        lcd1.setCursor(0, 1);
+        lcd1.print(rooms[room-1]);
+        lcd1.print(" person");
+        break;
+  case 2:
+        lcd2.print("Door is open");
+        lcd2.setCursor(0, 1);
+        lcd2.print(rooms[room-1]);
+        lcd2.print(" person");
+        break;
+  case 3:
+        lcd3.print("Door is open");
+        lcd3.setCursor(0, 1);
+        lcd3.print(rooms[room-1]);
+        lcd3.print(" person");
+        break;  
+ }
+}
+
+void lockRoom(int room)
+{
+  lcd1.clear();
+  lcd2.clear();
+  lcd3.clear();
+  doors[room-1]=false;
+ switch(room)
+ {
+  case 1:
+        if(doors[room-1]==true){
+        lcd1.print("Door is open");
+        lcd1.setCursor(0, 1);
+        lcd1.print(rooms[room-1]);
+        lcd1.print(" person");}
+        else 
+          lcd1.print("Locked");
+        break;
+  case 2:
+        if(doors[room-1]==true){
+        lcd2.print("Door is open");
+        lcd2.setCursor(0, 1);
+        lcd2.print(rooms[room-1]);
+        lcd2.print(" person");}
+        else 
+          lcd1.print("Locked");
+        break;
+  case 3:
+        if(doors[room-1]==true){
+        lcd3.print("Door is open");
+        lcd3.setCursor(0, 1);
+        lcd3.print(rooms[room-1]);
+        lcd3.print(" person");}
+        else 
+          lcd1.print("Locked");
+        break; 
+ }
+}
+void emptyAll(){
+  lcd1.clear();
+  lcd2.clear();
+  lcd3.clear();
+  rooms[0]=0;
+  rooms[1]=0;
+  rooms[2]=0;
+  doors[0]=false;
+  doors[1]=false;
+  doors[2]=false;
+  lcd1.print("Locked and Empty");
+  lcd2.print("Locked and Empty");
+  lcd3.print("Locked and Empty");
+}

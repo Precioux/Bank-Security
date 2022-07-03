@@ -1,16 +1,18 @@
 #include <Keypad.h>
-
 // setup keypad
 const byte ROWS = 4; //four rows
 const byte COLS = 4; //four columns
+//setting passwords for all rooms
 const char passOne[] = "12341";
 const char passTwo[] = "12342";
 const char passThree[] = "12343";
+//other initializations
 bool requested = false;
 bool lastRequest = false;
+//rooms data
 int rooms[3]={0,0,0};
 bool doors[3]={false,false,false};
-byte sendData[2];
+int room =0;
 char keys[ROWS][COLS] = {
   {'7','8','9', '/'},
   {'4','5','6', '*'},
@@ -20,7 +22,7 @@ char keys[ROWS][COLS] = {
 byte rowPins[ROWS] = {13, 12, 11, 10}; //connect to the row pinouts of the keypad
 byte colPins[COLS] = {14, 15, 16, 17}; //connect to the column pinouts of the keypad
 Keypad keypad = Keypad( makeKeymap(keys), rowPins, colPins, ROWS, COLS );
-int room =0;
+
 
 void setup() {
   // put your setup code here, to run once:
@@ -31,8 +33,12 @@ void loop() {
   // put your main code here, to run repeatedly:
  char key = keypad.getKey();
  if(key!=NO_KEY){
- Serial.println("Request detected...");
- welcome(key);
+   Serial.println("Request detected...");
+  if(key=='+'){
+  Serial.println("Entering Mode, Which room?");
+   char k = keypad.getKey();
+   if(k!=NO_KEY){
+ welcome(k);
   int result = -2;;
   if(requested){
      result = passCheck();
@@ -51,18 +57,65 @@ void loop() {
         break;        
      } 
      delay(5000);
+     Serial.println("Closing door of room...");
+     Serial.print('$');
+      switch(room){
+     case 1:
+        Serial.println('7');
+        break;
+     case 2:
+        Serial.println('8');
+        break;
+     case 3:
+        Serial.println('9');
+        break;       
+      }
+     doors[room-1]=false;
      requested = false;
-     doors[room-1]=true;
+     
   }
   else{
+    if(result == -1){
     Serial.println("Wrong Password!");
-     Serial.println('$');
-     Serial.print('4'); // sending array which will go byte by byte in sequence 
-     delay(5000);
+    Serial.println('$');
+    Serial.print('0');
+    delay(100);
     callPolice();
     requested = false;
+    }
+    else{
+     if(result==-3)
+        Serial.println("Room is full, try again later");
+        requested = false;
+    }
   }
 }
+  }
+ }
+ else
+ {
+  if(key=='-')
+  {
+   Serial.println("Exiting Mode, Which room?");
+   char k = keypad.getKey();
+   if(k!=NO_KEY){  
+     rooms[room-1]--;
+     Serial.print('$');
+     switch(room){
+     case 4:
+        Serial.println('4');
+        break;
+     case 5:
+        Serial.println('5');
+        break;
+     case 6:
+        Serial.println('6');
+        break;       
+      }
+      requested = false;
+   }
+  }
+ }
 }
 }
 
@@ -172,7 +225,12 @@ int passCheck(){
       }
       if(check==5){
          result = 1;
-         rooms[room-1]++;
+         if(doors[room-1]==false)
+            doors[room-1]=true;
+         if(rooms[room-1]<3){
+            rooms[room-1]++;
+         }
+         else result=-3
       }
      }
      return result;
