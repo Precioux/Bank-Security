@@ -34,7 +34,6 @@ bool managerFlag = false;
 void setup() {
   Serial.begin(9600);
   Wire.begin(); //This function initializes the Wire library and join the I2C bus as a controller or a peripheral
- 
 }
 
 void loop() {
@@ -465,7 +464,6 @@ if(passDone==true)
   {
     if(roomFlag==false)
     {
-      //Serial.println("In room flag");
      if(key){
       switch(key)
       {
@@ -544,7 +542,6 @@ if(passDone==true)
      }
      if(passDone2==true)
 {
-     Serial.println(lenPass);
     if(lenPass==5)
      {
       switch(roomNumber)
